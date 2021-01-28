@@ -523,6 +523,9 @@ GIT_EXTERN(int) git_commit_dup(git_commit **out, git_commit *source);
 typedef int (*git_commit_signing_cb)(
 	git_buf *signature, git_buf *signature_field, const char *commit_content, void *payload);
 
+GIT_EXTERN(int) git_commit_entry_last_commit_id(git_oid *out, git_repository *repo,
+    const git_commit *commit, const char *path);
+
 /** @} */
 GIT_END_DECL
 #endif
