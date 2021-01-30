@@ -2,9 +2,9 @@ EXPORTS
 	ContentGetDetectString
 	ContentGetSupportedField
 	ContentGetValue
+	ContentGetValueW
 	ContentSetDefaultParams
-	ContentStopGetValue
 	ContentGetSupportedFieldFlags
 	ContentGetDefaultSortOrder
-	;ContentSetValue
-	;ContentCompareFiles
+	ContentPluginUnloading
+	ContentSetDefaultParams
