@@ -32,7 +32,7 @@
 #define fieldcount 23
 
 // general info groups:
-enum EGitWantSrc
+enum class EGitWantSrc
 {
     ENone,
     EThisCommit,      // the checkout-commit where we stand
@@ -40,7 +40,7 @@ enum EGitWantSrc
     ELastFallthrough  // the last commit affected file OR currentcheckout
 };
 
-enum EGitWant
+enum class EGitWant
 {
     EMsg,
     EAuthor,
@@ -59,8 +59,8 @@ enum EGitWant
 
 // clang-format off
 
-// specific fields: cant be done by formatting because of datetime
-enum EFields
+// specific fields: can't be done by formatting because of datetime
+enum class EFields
 {
     EFSizeBranch = 0,
     EFThisMsg, EFThisAuthor, EFThisMail, EFThisDate, EFThisAge,  // commit where we stand
@@ -498,8 +498,8 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
     __int64 filesize;
 
     if (flags & CONTENT_PASSTHROUGH) {
-        switch (FieldIndex) {
-            case EFSizeBranch: {
+        switch (EFields(FieldIndex)) {
+            case EFields::EFSizeBranch: {
                 filesize = (__int64)*(double *)FieldValue;
                 switch (UnitIndex) {
                     case 1:
@@ -524,67 +524,104 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
 
     // parsing what we want:
     EGitWant xWant;
-    EGitWantSrc xWantFrom = ENone;
-    switch (FieldIndex) {
+    EGitWantSrc xWantFrom = EGitWantSrc::ENone;
+    switch (EFields(FieldIndex)) {
         default:
             return ft_nosuchfield;
-        case EFSizeBranch:
-            xWant = ESizeBranch;
+        case EFields::EFSizeBranch:
+            xWant = EGitWant::ESizeBranch;
             break;
-        case EFBranch:
-            xWant = EBranch;
+        case EFields::EFBranch:
+            xWant = EGitWant::EBranch;
             break;
-        case EFDirBranch:
-            xWant = EDirBranch;
+        case EFields::EFDirBranch:
+            xWant = EGitWant::EDirBranch;
             break;
-        case EFFirstRemoteURL:
-            xWant = EFirstRemoteURL;
+        case EFields::EFFirstRemoteURL:
+            xWant = EGitWant::EFirstRemoteURL;
             break;
-        case EFFileStatus:
-            xWant = EFileStatus;
+        case EFields::EFFileStatus:
+            xWant = EGitWant::EFileStatus;
             break;
-        case EFGeneralStatus:
-            xWant = EGeneralStatus;
+        case EFields::EFGeneralStatus:
+            xWant = EGitWant::EGeneralStatus;
             break;
-        case EFFallIsThis:
-            xWant = EFallIsThis;
-            xWantFrom = ELastFallthrough;
+        case EFields::EFFallIsThis:
+            xWant = EGitWant::EFallIsThis;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
             break;
-        case EFThisMsg:
-        case EFThisAuthor:
-        case EFThisMail:
-        case EFThisDate:
-        case EFThisAge:
-            xWant = static_cast<EGitWant>(EMsg + (FieldIndex - EFThisMsg));
-            xWantFrom = EThisCommit;
+        case EFields::EFThisMsg:
+            xWant = EGitWant::EMsg;
+            xWantFrom = EGitWantSrc::EThisCommit;
             break;
-        case EFLastMsg:
-        case EFLastAuthor:
-        case EFLastMail:
-        case EFLastDate:
-        case EFLastAge:
-            xWant = static_cast<EGitWant>(EMsg + (FieldIndex - EFLastMsg));
-            xWantFrom = ELastAffecting;
+        case EFields::EFThisAuthor:
+            xWant = EGitWant::EAuthor;
+            xWantFrom = EGitWantSrc::EThisCommit;
             break;
-        case EFFallMsg:
-        case EFFallAuthor:
-        case EFFallMail:
-        case EFFallDate:
-        case EFFallAge:
-            xWant = static_cast<EGitWant>(EMsg + (FieldIndex - EFFallMsg));
-            xWantFrom = ELastFallthrough;
+        case EFields::EFThisMail:
+            xWant = EGitWant::EMail;
+            xWantFrom = EGitWantSrc::EThisCommit;
             break;
-        case EFDescription:
-            xWant = EDescription;
+        case EFields::EFThisDate:
+            xWant = EGitWant::EDate;
+            xWantFrom = EGitWantSrc::EThisCommit;
+            break;
+        case EFields::EFThisAge:
+            xWant = EGitWant::EAge;
+            xWantFrom = EGitWantSrc::EThisCommit;
+            break;
+        case EFields::EFLastMsg:
+            xWant = EGitWant::EMsg;
+            xWantFrom = EGitWantSrc::ELastAffecting;
+            break;
+        case EFields::EFLastAuthor:
+            xWant = EGitWant::EAuthor;
+            xWantFrom = EGitWantSrc::ELastAffecting;
+            break;
+        case EFields::EFLastMail:
+            xWant = EGitWant::EMail;
+            xWantFrom = EGitWantSrc::ELastAffecting;
+            break;
+        case EFields::EFLastDate:
+            xWant = EGitWant::EDate;
+            xWantFrom = EGitWantSrc::ELastAffecting;
+            break;
+        case EFields::EFLastAge:
+            xWant = EGitWant::EAge;
+            xWantFrom = EGitWantSrc::ELastAffecting;
+            break;
+        case EFields::EFFallMsg:
+            xWant = EGitWant::EMsg;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
+            break;
+        case EFields::EFFallAuthor:
+            xWant = EGitWant::EAuthor;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
+            break;
+        case EFields::EFFallMail:
+            xWant = EGitWant::EMail;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
+            break;
+        case EFields::EFFallDate:
+            xWant = EGitWant::EDate;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
+            break;
+        case EFields::EFFallAge:
+            xWant = EGitWant::EAge;
+            xWantFrom = EGitWantSrc::ELastFallthrough;
+            break;
+        case EFields::EFDescription:
+            xWant = EGitWant::EDescription;
             break;
     }
 
-    const bool xNeedfd = true;  // everybody needs the information if file or directory
-    const bool xStdGit =
-        FieldIndex != EFSizeBranch && xWant != EDescription;  // only size and allinfo is treated differently
-    const bool xNeedRepo = true;                              // everybody (in case xStdGit) needs repo
-    const bool xNeedCommit = xWantFrom != ENone;
-    const bool xNeedLastAffCommit = (xWantFrom == ELastFallthrough || xWantFrom == ELastAffecting);
+    constexpr bool xNeedfd = true;  // everybody needs the information if file or directory
+    const bool xStdGit = EFields(FieldIndex) != EFields::EFSizeBranch &&
+                         xWant != EGitWant::EDescription;  // only size and allinfo is treated differently
+    constexpr bool xNeedRepo = true;                       // everybody (in case xStdGit) needs repo
+    const bool xNeedCommit = xWantFrom != EGitWantSrc::ENone;
+    const bool xNeedLastAffCommit =
+        (xWantFrom == EGitWantSrc::ELastFallthrough || xWantFrom == EGitWantSrc::ELastAffecting);
 
     // finito, now to actually do it.
 
@@ -650,9 +687,9 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                 // special first and then commit infos.
                 if (!xDidError)  // pre error
                 {
-                    if (xWant == EBranch || xWant == EDirBranch)  // branch
+                    if (xWant == EGitWant::EBranch || xWant == EGitWant::EDirBranch)  // branch
                     {
-                        if (xWant == EDirBranch && !xDirectory) {
+                        if (xWant == EGitWant::EDirBranch && !xDirectory) {
                             xReturnEmpty = true;
                         } else {
                             const char *branch = nullptr;
@@ -671,7 +708,7 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
 
                             git_reference_free(head);
                         }
-                    } else if (xWant == EFirstRemoteURL) {
+                    } else if (xWant == EGitWant::EFirstRemoteURL) {
                         git_strarray xRs;
                         if (0 == git_remote_list(&xRs, repo)) {
                             if (xRs.count >= 1) {
@@ -688,14 +725,14 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                             git_strarray_free(&xRs);
                         } else
                             xReturnEmpty = true;
-                    } else if (xWant == EFileStatus || xWant == EGeneralStatus) {
+                    } else if (xWant == EGitWant::EFileStatus || xWant == EGitWant::EGeneralStatus) {
                         char *xTrgt;
-                        if (xWant == EGeneralStatus && !xDirectory) {
+                        if (xWant == EGitWant::EGeneralStatus && !xDirectory) {
                             strlcpy(pFieldStr, "File ", maxSize);
                             xTrgt = pFieldStr + std::strlen(pFieldStr);
                         } else
                             xTrgt = pFieldStr;
-                        if ((!xDirectory && xWant == EGeneralStatus) || xWant == EFileStatus) {
+                        if ((!xDirectory && xWant == EGitWant::EGeneralStatus) || xWant == EGitWant::EFileStatus) {
                             unsigned int xStatF = 0;
                             if ((xBufFN[0] != '\0') && 0 == git_status_file(&xStatF, repo, xBufFN)) {
                                 if (xStatF & GIT_STATUS_IGNORED)
@@ -723,21 +760,22 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                                 // else
                                 strlcpy(xTrgt, "unchanged", maxSize);
                             }
-                        } else if (xDirectory && xWant == EGeneralStatus) {
+                        } else if (xDirectory && xWant == EGitWant::EGeneralStatus) {
                             strlcpy(xTrgt, "GIT dir", maxSize);
                         }
-                    } else if (xWant == ENone) {
+                    } else if (!xNeedCommit) {
                         xReturnEmpty = true;
                     } else  // info o commitu
                     {
                         // EMsg,EAuthor,EMail,EDate,EAge
                         // EThisCommit,ELastAffecting,ELastFallthrough
 
-                        if (xWantFrom == ELastAffecting && xFilesCommit == nullptr) {
+                        if (xWantFrom == EGitWantSrc::ELastAffecting && xFilesCommit == nullptr) {
                             xReturnEmpty = true;
                         } else {
                             git_commit *xPtrUse;
-                            if (xWantFrom == EThisCommit || (xWantFrom == ELastFallthrough && xFilesCommit == nullptr))
+                            if (xWantFrom == EGitWantSrc::EThisCommit ||
+                                (xWantFrom == EGitWantSrc::ELastFallthrough && xFilesCommit == nullptr))
                                 xPtrUse = commit;
                             else
                                 xPtrUse = xFilesCommit;
@@ -746,13 +784,13 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                                 xReturnEmpty = true;
                             else {
                                 switch (xWant) {  // EMsg,EAuthor,EMail,EDate,EAge
-                                    case EFallIsThis: {
+                                    case EGitWant::EFallIsThis: {
                                         if (xPtrUse == commit)
                                             strlcpy(pFieldStr, "This commit", maxSize);
                                         else
                                             strlcpy(pFieldStr, "Last affecting", maxSize);
                                     } break;
-                                    case EMsg:  // git last commitmessage
+                                    case EGitWant::EMsg:  // git last commitmessage
                                     {
                                         strlcpy(pFieldStr, git_commit_summary(xPtrUse),
                                                 maxSize);  // whole message: git_commit_message
@@ -762,12 +800,12 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                                             delete[] wBuf;
                                         }
                                     } break;
-                                    case EAuthor:  //"CommitAuthor"
-                                    case EMail: {
+                                    case EGitWant::EAuthor:  //"CommitAuthor"
+                                    case EGitWant::EMail: {
                                         const git_signature *xSig = git_commit_author(xPtrUse);
                                         if (xSig) {
                                             switch (xWant) {
-                                                case EAuthor: {  // name
+                                                case EGitWant::EAuthor: {  // name
                                                     strlcpy(pFieldStr, xSig->name, maxSize);
                                                     wchar_t *wBuf = cp2u(CP_UTF8, pFieldStr);
                                                     if (wBuf) {
@@ -775,19 +813,19 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                                                         delete[] wBuf;
                                                     }
                                                 } break;
-                                                case EMail:  // email
+                                                case EGitWant::EMail:  // email
                                                     strlcpy(pFieldStr, xSig->email, maxSize);
                                                     break;
                                             }
                                         }
                                     } break;
-                                    case EDate:  //"CommitDatetime"
+                                    case EGitWant::EDate:  //"CommitDatetime"
                                     {
                                         git_time_t comtim = git_commit_time(xPtrUse);
                                         const int origoffset = git_commit_time_offset(xPtrUse);
                                         TimetToFileTime(comtim, ((FILETIME *)FieldValue));
                                     } break;
-                                    case EAge:  //"CommitAge"
+                                    case EGitWant::EAge:  //"CommitAge"
                                     {
                                         git_time_t comtim = git_commit_time(xPtrUse);
                                         time_t xNow;
@@ -813,8 +851,8 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                 return ft_fieldempty;
         } else  // operations out of git or special:
         {
-            switch (FieldIndex) {
-                case EFSizeBranch:  // "size"  + SPECIAL FOR GIT
+            switch (EFields(FieldIndex)) {
+                case EFields::EFSizeBranch:  // "size"  + SPECIAL FOR GIT
                 {
                     filesize = fd.nFileSizeHigh;
                     filesize = (filesize << 32) + fd.nFileSizeLow;
@@ -878,8 +916,8 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                         }
                     }
                 } break;
-                case EFDescription:  // for hints in TC ...generally
-                {                    // for future when allowed more than 2 lines per one call to getvalue
+                case EFields::EFDescription:  // for hints in TC ...generally
+                {                             // for future when allowed more than 2 lines per one call to getvalue
                     EPositionType xRet;
                     git_commit *commit = nullptr; /* the result */
                     git_oid oid_parent_commit;    /* the SHA1 for last commit */
@@ -955,7 +993,8 @@ PLUGFUNC int __stdcall ContentGetValueW(const wchar_t *FileName, int FieldIndex,
                         } else  // can print more about commits
                         {
                             git_commit *xPtrUse;
-                            if (xWantFrom == EThisCommit || (xWantFrom == ELastFallthrough && xFilesCommit == nullptr))
+                            if (xWantFrom == EGitWantSrc::EThisCommit ||
+                                (xWantFrom == EGitWantSrc::ELastFallthrough && xFilesCommit == nullptr))
                                 xPtrUse = commit;
                             else
                                 xPtrUse = xFilesCommit;
