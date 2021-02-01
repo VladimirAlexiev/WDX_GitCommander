@@ -1,10 +1,9 @@
 EXPORTS
+	ContentGetDefaultSortOrder
 	ContentGetDetectString
 	ContentGetSupportedField
+	ContentGetSupportedFieldFlags
 	ContentGetValue
 	ContentGetValueW
-	ContentSetDefaultParams
-	ContentGetSupportedFieldFlags
-	ContentGetDefaultSortOrder
 	ContentPluginUnloading
 	ContentSetDefaultParams
